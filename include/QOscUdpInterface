@@ -1,0 +1,6 @@
+#ifndef QOSCUDPINTERFACE
+#define QOSCUDPINTERFACE
+
+#include "qoscudpinterface.h"
+
+#endif // QOSCUDPINTERFACE

@@ -5,6 +5,7 @@
 #include "qoscbundle.h"
 #include "qoscmessage.h"
 #include "qoscinterface.h"
+#include "qoscudpinterface.h"
 #include "qoscmethod.h"
 
 #endif // QOSC_H

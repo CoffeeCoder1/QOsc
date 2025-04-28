@@ -1,0 +1,6 @@
+#ifndef QOSCTCPINTERFACE
+#define QOSCTCPINTERFACE
+
+#include "qosctcpinterface.h"
+
+#endif // QOSCUDPINTERFACE

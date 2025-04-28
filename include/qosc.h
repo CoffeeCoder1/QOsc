@@ -6,6 +6,7 @@
 #include "qoscmessage.h"
 #include "qoscinterface.h"
 #include "qoscudpinterface.h"
+#include "qosctcpinterface.h"
 #include "qoscmethod.h"
 
 #endif // QOSC_H

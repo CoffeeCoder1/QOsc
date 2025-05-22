@@ -8,6 +8,8 @@ QOscTcpInterface::QOscTcpInterface(QObject* parent) :
 {
     QObject::connect(&socket, &QAbstractSocket::readyRead,
                      this,    &QOscTcpInterface::readReady);
+    QObject::connect(&socket, &QAbstractSocket::connected,
+                     this,    &QOscTcpInterface::connected);
     rebind();
 }
 

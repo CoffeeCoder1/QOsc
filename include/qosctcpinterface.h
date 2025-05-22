@@ -25,7 +25,8 @@ signals:
 	void remoteAddressChanged(const QString& addr);
 	void remotePortChanged(quint16 port);
 	
-	void isListeningChanged();
+	void connected();
+	void disconnected();
 
 protected:
 	void sendData(const QByteArray& data) override;

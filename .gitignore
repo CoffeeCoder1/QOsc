@@ -2,3 +2,5 @@
 
 **/*.user
 **/.DS_Store
+.vscode/
+builds/

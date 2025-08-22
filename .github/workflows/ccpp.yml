@@ -31,7 +31,7 @@ jobs:
 
       - run: cmake --install build
 
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v4.6.2
         with:
           name: release-${{ runner.os }}
           path: dist

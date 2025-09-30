@@ -64,60 +64,79 @@ void QOscTcpInterface::rebind()
     socket.connectToHost(remoteAddr, remotePort);
 }
 
-void QOscTcpInterface::sendData(const QByteArray& data)
-{
-    // Find the packet size
-    qint32 packetSize = data.size();
-    QByteArray packetSizeArray;
-    packetSizeArray.append(packetSize);
+void QOscTcpInterface::sendData(const QByteArray &data) {
+	// Create a buffer to hold the packet's data
+	QBuffer b;
+	b.open(QIODevice::WriteOnly);
 
-    // Create a buffer to hold the packet's data
-    QBuffer b;
-    b.open(QIODevice::WriteOnly);
+	// Write the start byte
+	b.putChar('\xC0');
 
-    // Write the packet size
-    b.write(QByteArray().fill(0, 4 - packetSizeArray.size()));
-    b.write(packetSizeArray);
+	// Write the data itself
+	b.write(data);
 
-    // Write the data itself
-    b.write(data);
-    socket.write(b.data());
-    emit messageSent();
+	// Write the end byte
+	b.putChar('\xC0');
+
+	socket.write(b.data());
+	emit messageSent();
 }
 
-void QOscTcpInterface::readReady()
-{
-    while(socket.bytesAvailable())
-    {
-        qint64 bytes = socket.read(1).at(0);
-        QByteArray data = socket.read(bytes);
+void QOscTcpInterface::readReady() {
+	QByteArray byteDataToRead = socket.peek(socket.bytesAvailable());
 
-        switch(QOsc::detectType(data))
-        {
-        case QOsc::OscMessage:
-        {
-            auto msg = QOscMessage::read(data);
-            if(msg.isValid())
-            {
-                processMessage(msg);
-                emit messageReceived(msg);
-            }
-            break;
-        }
+	// Iterate through the data, find packets, and do things with them
+	bool packetStarted = false;
+	qint64 startIndex = 0;
+	qint64 endIndex = 0;
+	for (qint64 i = 0; i < byteDataToRead.length(); i++) {
+		bool byteFound = QByteArrayView(byteDataToRead)
+								 .slice(i, 1)
+								 .contains('\xC0');
+		if (byteFound) {
+			// In the case that a zero-byte packet is found, this usually means
+			// that the end of a packet was recieved but the start was missed,
+			// so this just resets things when that happens.
+			if (startIndex == i - 1) {
+				packetStarted = false;
+			}
 
-        case QOsc::OscBundle:
-        {
-            auto bundle = QOscBundle::read(data);
-            if(bundle.isValid())
-            {
-                processBundle(bundle);
-                emit bundleReceived(bundle);
-            }
-            break;
-        }
+			if (!packetStarted) {
+				packetStarted = true;
+				startIndex = i;
+			} else {
+				packetStarted = false;
+				endIndex = i;
 
-        default:
-            break;
-        }
-    }
+				QByteArray data = QByteArray(QByteArrayView(byteDataToRead)
+								.slice(startIndex + 1, endIndex - startIndex - 1));
+
+				switch (QOsc::detectType(data)) {
+					case QOsc::OscMessage: {
+						auto msg = QOscMessage::read(data);
+						if (msg.isValid()) {
+							processMessage(msg);
+							emit messageReceived(msg);
+						}
+						break;
+					}
+
+					case QOsc::OscBundle: {
+						auto bundle = QOscBundle::read(data);
+						if (bundle.isValid()) {
+							processBundle(bundle);
+							emit bundleReceived(bundle);
+						}
+						break;
+					}
+
+					default:
+						break;
+				}
+			}
+		}
+	}
+
+	// Discard the data that has already been processed
+	socket.skip(endIndex);
 }

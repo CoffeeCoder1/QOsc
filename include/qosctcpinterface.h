@@ -3,6 +3,7 @@
 
 #include "qoscinterface.h"
 #include <QTcpSocket>
+#include <QTimer>
 
 class QOSC_EXPORT QOscTcpInterface :  public QOscInterface
 {
@@ -37,7 +38,8 @@ private:
 	QHostAddress remoteAddr = QHostAddress("127.0.0.1");
 	quint16      remotePort = 0;
 	QTcpSocket   socket;
-	
+	QTimer reconnectTimer;
+
 private slots:
 	void readReady();
 };

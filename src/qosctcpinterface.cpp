@@ -10,7 +10,20 @@ QOscTcpInterface::QOscTcpInterface(QObject* parent) :
                      this,    &QOscTcpInterface::readReady);
     QObject::connect(&socket, &QAbstractSocket::connected,
                      this,    &QOscTcpInterface::connected);
-    rebind();
+
+	// Reconnect logic
+	QObject::connect(&reconnectTimer, &QTimer::timeout, this, &QOscTcpInterface::rebind);
+	reconnectTimer.setInterval(5000);
+	reconnectTimer.start();
+
+	QObject::connect(&socket, &QTcpSocket::connected, &reconnectTimer, &QTimer::stop);
+
+	QObject::connect(&socket, &QTcpSocket::disconnected, this, [&] {
+		qWarning("Disconnected from host.");
+		reconnectTimer.start();
+	});
+
+	rebind();
 }
 
 QOscTcpInterface::~QOscTcpInterface()

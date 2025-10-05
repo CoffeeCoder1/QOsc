@@ -1,22 +1,21 @@
 #ifndef QOSCBUNDLE_P_H
 #define QOSCBUNDLE_P_H
 
-#include <qoscvalue.h>
+#include "qoscvalue.h"
 
 class QOscBundle;
-class QOscBundlePrivate
-{
+class QOscBundlePrivate {
 public:
-    QOscBundlePrivate(QOscBundle* q);
+	QOscBundlePrivate(QOscBundle *q);
 
-    void write(QIODevice* dev) const;
+	void write(QIODevice *dev) const;
 
-    void load(QIODevice* dev);
+	void load(QIODevice *dev);
 
-    QOscBundle* q_ptr;
-    Q_DECLARE_PUBLIC(QOscBundle)
+	QOscBundle *q_ptr;
+	Q_DECLARE_PUBLIC(QOscBundle)
 
-    QOscValue time;
+	QOscValue time;
 };
 
 #endif // QOSCBUNDLE_P_H

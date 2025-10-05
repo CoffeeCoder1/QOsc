@@ -1,22 +1,24 @@
-#include <qosctcpinterface.h>
 #include <QBuffer>
 #include <QNetworkDatagram>
 #include <QNetworkInterface>
 
-QOscTcpInterface::QOscTcpInterface(QObject* parent) :
-    QOscInterface(parent)
-{
-    QObject::connect(&socket, &QAbstractSocket::readyRead,
-                     this,    &QOscTcpInterface::readReady);
-    QObject::connect(&socket, &QAbstractSocket::connected,
-                     this,    &QOscTcpInterface::connected);
+#include "qosctcpinterface.h"
+
+QOscTcpInterface::QOscTcpInterface(QObject *parent) :
+		QOscInterface(parent) {
+	QObject::connect(&socket, &QAbstractSocket::readyRead, this,
+			&QOscTcpInterface::readReady);
+	QObject::connect(&socket, &QAbstractSocket::connected, this,
+			&QOscTcpInterface::connected);
 
 	// Reconnect logic
-	QObject::connect(&reconnectTimer, &QTimer::timeout, this, &QOscTcpInterface::rebind);
+	QObject::connect(&reconnectTimer, &QTimer::timeout, this,
+			&QOscTcpInterface::rebind);
 	reconnectTimer.setInterval(5000);
 	reconnectTimer.start();
 
-	QObject::connect(&socket, &QTcpSocket::connected, &reconnectTimer, &QTimer::stop);
+	QObject::connect(&socket, &QTcpSocket::connected, &reconnectTimer,
+			&QTimer::stop);
 
 	QObject::connect(&socket, &QTcpSocket::disconnected, this, [&] {
 		qWarning("Disconnected from host.");
@@ -26,55 +28,42 @@ QOscTcpInterface::QOscTcpInterface(QObject* parent) :
 	rebind();
 }
 
-QOscTcpInterface::~QOscTcpInterface()
-{
+QOscTcpInterface::~QOscTcpInterface() {}
 
+QString QOscTcpInterface::getRemoteAddress() const {
+	return remoteAddr.toString();
 }
 
-QString QOscTcpInterface::getRemoteAddress() const
-{
-    return remoteAddr.toString();
+void QOscTcpInterface::setRemoteAddress(const QString &addr) {
+	QHostAddress hostAddr(addr);
+
+	if (hostAddr != remoteAddr) {
+		remoteAddr = hostAddr;
+		emit remoteAddressChanged(addr);
+		rebind();
+	}
 }
 
-void QOscTcpInterface::setRemoteAddress(const QString& addr)
-{
-    QHostAddress hostAddr(addr);
+quint16 QOscTcpInterface::getRemotePort() const { return remotePort; }
 
-    if(hostAddr != remoteAddr)
-    {
-        remoteAddr = hostAddr;
-        emit remoteAddressChanged(addr);
-        rebind();
-    }
+void QOscTcpInterface::setRemotePort(quint16 p) {
+	if (p != remotePort) {
+		remotePort = p;
+		emit remotePortChanged(p);
+		rebind();
+	}
 }
 
-quint16 QOscTcpInterface::getRemotePort() const
-{
-    return remotePort;
-}
+void QOscTcpInterface::rebind() {
+	if (socket.isValid()) {
+		socket.disconnectFromHost();
 
-void QOscTcpInterface::setRemotePort(quint16 p)
-{
-    if(p != remotePort)
-    {
-        remotePort = p;
-        emit remotePortChanged(p);
-        rebind();
-    }
-}
+		if (socket.state() != QAbstractSocket::UnconnectedState) {
+			socket.waitForDisconnected();
+		}
+	}
 
-void QOscTcpInterface::rebind()
-{
-    if(socket.isValid())
-    {
-        socket.disconnectFromHost();
-
-        if(socket.state() != QAbstractSocket::UnconnectedState) {
-            socket.waitForDisconnected();
-        }
-    }
-
-    socket.connectToHost(remoteAddr, remotePort);
+	socket.connectToHost(remoteAddr, remotePort);
 }
 
 void QOscTcpInterface::sendData(const QByteArray &data) {
@@ -103,9 +92,8 @@ void QOscTcpInterface::readReady() {
 	qint64 startIndex = 0;
 	qint64 endIndex = 0;
 	for (qint64 i = 0; i < byteDataToRead.length(); i++) {
-		bool byteFound = QByteArrayView(byteDataToRead)
-								 .slice(i, 1)
-								 .contains('\xC0');
+		bool byteFound =
+				QByteArrayView(byteDataToRead).slice(i, 1).contains('\xC0');
 		if (byteFound) {
 			// In the case that a zero-byte packet is found, this usually means
 			// that the end of a packet was recieved but the start was missed,
@@ -121,8 +109,9 @@ void QOscTcpInterface::readReady() {
 				packetStarted = false;
 				endIndex = i;
 
-				QByteArray data = QByteArray(QByteArrayView(byteDataToRead)
-								.slice(startIndex + 1, endIndex - startIndex - 1));
+				QByteArray data =
+						QByteArray(QByteArrayView(byteDataToRead)
+										.slice(startIndex + 1, endIndex - startIndex - 1));
 
 				switch (QOsc::detectType(data)) {
 					case QOsc::OscMessage: {

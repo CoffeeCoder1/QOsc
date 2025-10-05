@@ -1,17 +1,67 @@
-# set headers
-set(header_path "${QOSC_SOURCE_DIR}/include")
-file(GLOB headers ${header_path}/QO* ${header_path}/qo*)
+# add the library sources
+set(
+    headers
+        QOsc
+        qosc.h
 
-# set sources
-file(GLOB src *.cpp)
+        qosc_global.h
+
+        QOscInterface
+        qoscinterface.h
+
+        QOscTcpInterface
+        qosctcpinterface.h
+
+        QOscUdpInterface
+        qoscudpinterface.h
+
+        QOscValue
+        qoscvalue.h
+
+        QOscMessage
+        qoscmessage.h
+
+        QOscBundle
+        qoscbundle.h
+
+        QOscMethod
+        qoscmethod.h
+)
+
+add_library(QOsc
+    SHARED
+        ${headers}
+        qosc_global.cpp
+
+        qoscinterface.cpp
+
+        qosctcpinterface.cpp
+
+        qoscudpinterface.cpp
+
+        qoscvalue.cpp
+        qoscvalue_p.h
+
+        qoscmessage.cpp
+        qoscmessage_p.h
+
+        qoscbundle.cpp
+        qoscbundle_p.h
+
+        qoscmethod.cpp
+)
 
 # define library target
-add_library(QOsc ${headers} ${src})
-target_link_libraries(QOsc PUBLIC Qt::Core Qt::Gui Qt::Network)
+target_link_libraries(
+    QOsc
+    PUBLIC
+        Qt::Core
+        Qt::Gui
+        Qt::Network
+)
 target_include_directories(
     QOsc
     PUBLIC
-        $<BUILD_INTERFACE:${header_path}>
         $<INSTALL_INTERFACE:${include_dest}>
 
     PRIVATE

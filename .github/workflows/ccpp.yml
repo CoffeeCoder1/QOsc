@@ -9,16 +9,23 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: 'ubuntu-latest'
+          - os: 'ubuntu-24.04-arm'
+          - os: 'windows-latest'
+            arch: 'win64_mingw'
+          - os: 'macos-latest'
 
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5.0.0
 
-      - uses: jurplel/install-qt-action@v2
+      - uses: jurplel/install-qt-action@d325aaf2a8baeeda41ad0b5d39f84a6af9bcf005
         with:
           modules: core gui network test
+          cache: true
+          arch: ${{ matrix.arch }}
 
       - run: cmake -DCMAKE_INSTALL_PREFIX=dist -DQOSC_BUILD_TESTS=ON -S . -B build
 

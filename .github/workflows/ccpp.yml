@@ -23,7 +23,6 @@ jobs:
 
       - uses: jurplel/install-qt-action@d325aaf2a8baeeda41ad0b5d39f84a6af9bcf005
         with:
-          modules: core gui network test
           cache: true
           arch: ${{ matrix.arch }}
 

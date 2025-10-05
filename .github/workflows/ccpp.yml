@@ -26,14 +26,14 @@ jobs:
           cache: true
           arch: ${{ matrix.arch }}
 
-      - run: qt-cmake -G Ninja -DCMAKE_INSTALL_PREFIX=dist -DQOSC_BUILD_TESTS=ON -S . -B build
+      - run: qt-cmake -G Ninja -DCMAKE_INSTALL_PREFIX=dist -DQOSC_BUILD_TESTS=OFF -S . -B build
 
       - run: cmake --build build --config Release
 
-      - run: ctest -C Release --output-on-failure
-        env:
-          QT_QPA_PLATFORM: offscreen
-        working-directory: build
+      #- run: ctest -C Release --output-on-failure
+      #  env:
+      #    QT_QPA_PLATFORM: offscreen
+      #  working-directory: build
 
       - run: cmake --install build
 

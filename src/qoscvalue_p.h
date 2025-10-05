@@ -7,6 +7,7 @@
 #include <QHash>
 #include <QIODevice>
 #include <QString>
+#include <QTimeZone>
 #include <QtEndian>
 
 #include "qosc.h"
@@ -395,7 +396,7 @@ public:
 	inline double toUnixEpoch() const { return toNtpEpoch() - unix_to_ntp; }
 
 	inline void fromTimeTag(const QDateTime &dt) override { fromUnixEpoch(dt.toMSecsSinceEpoch() / 1000.0); }
-	inline QDateTime toTimeTag(const QDateTime &) const override { return QDateTime::fromMSecsSinceEpoch(toUnixEpoch() * 1000, Qt::UTC); }
+	inline QDateTime toTimeTag(const QDateTime &) const override { return QDateTime::fromMSecsSinceEpoch(toUnixEpoch() * 1000, QTimeZone(Qt::UTC)); }
 
 	inline uint hash(uint seed = 0) override { return qHash(t, seed) ^ QOscValuePrivate::hash(seed); }
 

@@ -39,5 +39,5 @@ jobs:
 
       - uses: actions/upload-artifact@v4.6.2
         with:
-          name: release-${{ runner.os }}
+          name: release-${{ matrix.os }}
           path: dist

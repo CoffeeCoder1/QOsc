@@ -62,6 +62,7 @@ target_link_libraries(
 target_include_directories(
     QOsc
     PUBLIC
+        $<BUILD_INTERFACE:${QOSC_SOURCE_DIR}/src>
         $<INSTALL_INTERFACE:${include_dest}>
 
     PRIVATE

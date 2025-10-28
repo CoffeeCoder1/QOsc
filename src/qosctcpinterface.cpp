@@ -117,8 +117,8 @@ void QOscTcpInterface::readReady() {
 					case QOsc::OscMessage: {
 						auto msg = QOscMessage::read(data);
 						if (msg.isValid()) {
-							processMessage(msg);
-							emit messageReceived(msg);
+							processMessage(msg, socket.peerAddress());
+							emit messageReceived(msg, socket.peerAddress());
 						}
 						break;
 					}
@@ -126,8 +126,8 @@ void QOscTcpInterface::readReady() {
 					case QOsc::OscBundle: {
 						auto bundle = QOscBundle::read(data);
 						if (bundle.isValid()) {
-							processBundle(bundle);
-							emit bundleReceived(bundle);
+							processBundle(bundle, socket.peerAddress());
+							emit bundleReceived(bundle, socket.peerAddress());
 						}
 						break;
 					}

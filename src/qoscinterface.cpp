@@ -41,36 +41,36 @@ void QOscInterface::disconnect(const QString &addr) {
 	}
 }
 
-void QOscInterface::processMessage(const QOscMessage &msg) {
+void QOscInterface::processMessage(const QOscMessage &msg, const QHostAddress &sender) {
 	for (auto &m : methods) {
 		if (msg.match(m->addr))
-			m->call(msg);
+			m->call(msg, sender);
 	}
 }
 
-void QOscInterface::processBundle(const QOscBundle &b) {
+void QOscInterface::processBundle(const QOscBundle &b, const QHostAddress &sender) {
 	auto t = b.time();
 
 	if (t.isNow())
-		executeBundle(b);
+		executeBundle(b, sender);
 	else {
 		qint64 ms = t.toDateTime().toMSecsSinceEpoch();
 		qint64 now = QDateTime::currentMSecsSinceEpoch();
 
 		if (ms <= now)
-			executeBundle(b);
+			executeBundle(b, sender);
 		else {
 			auto b2 = b;
 			b2.setTime(QOscValue::asap());
 
 			ms -= now;
 
-			QTimer::singleShot(ms, this, [this, b2]() { processBundle(b2); });
+			QTimer::singleShot(ms, this, [this, b2, sender]() { processBundle(b2, sender); });
 		}
 	}
 }
 
-void QOscInterface::executeBundle(const QOscBundle &b) {
+void QOscInterface::executeBundle(const QOscBundle &b, const QHostAddress &sender) {
 	for (auto &e : b)
-		processMessage(e);
+		processMessage(e, sender);
 }

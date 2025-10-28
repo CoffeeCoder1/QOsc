@@ -8,6 +8,6 @@ QOscSlotMethod::QOscSlotMethod(const QString &addr, QObject *obj, const char *sl
 		_slot(slot) {
 }
 
-void QOscSlotMethod::call(const QOscMessage &msg) {
-	QMetaObject::invokeMethod(_obj, _slot, Qt::DirectConnection, Q_ARG(QOscMessage, msg));
+void QOscSlotMethod::call(const QOscMessage &msg, const QHostAddress &sender) {
+	QMetaObject::invokeMethod(_obj, _slot, Qt::DirectConnection, Q_ARG(QOscMessage, msg), Q_ARG(QHostAddress, sender));
 }

@@ -1,6 +1,8 @@
 #ifndef QOSCMETHOD_H
 #define QOSCMETHOD_H
 
+#include <QHostAddress>
+
 #include "qoscmessage.h"
 
 class QOSC_EXPORT QOscMethod
@@ -11,9 +13,9 @@ public:
     QOscMethod(const QString& addr) : addr(addr) {};
     virtual ~QOscMethod() {};
 
-    virtual void call(const QOscMessage& msg) = 0;
+	virtual void call(const QOscMessage &msg, const QHostAddress &sender) = 0;
 
-    const QString addr;
+	const QString addr;
 };
 
 class QOSC_EXPORT QOscSlotMethod : public QOscMethod
@@ -21,7 +23,7 @@ class QOSC_EXPORT QOscSlotMethod : public QOscMethod
 public:
     QOscSlotMethod(const QString& addr, QObject* obj, const char* slot);
 
-    void call(const QOscMessage& msg) override;
+	void call(const QOscMessage &msg, const QHostAddress &sender) override;
 
 private:
     QObject*    _obj;
@@ -34,7 +36,7 @@ class QOscLambdaMethod : public QOscMethod
 public:
     QOscLambdaMethod(const QString& addr, Func f) : QOscMethod(addr), _f(f) {}
 
-    inline void call(const QOscMessage& msg) override { _f(msg); }
+	inline void call(const QOscMessage &msg, const QHostAddress &sender) override { _f(msg, sender); }
 
 private:
     Func _f;

@@ -106,15 +106,15 @@ void QOscUdpInterface::sendData(const QByteArray &data) {
 
 void QOscUdpInterface::readReady() {
 	while (socket.hasPendingDatagrams()) {
-		auto datagram = socket.receiveDatagram();
+		QNetworkDatagram datagram = socket.receiveDatagram();
 		auto data = datagram.data();
 
 		switch (QOsc::detectType(data)) {
 			case QOsc::OscMessage: {
 				auto msg = QOscMessage::read(data);
 				if (msg.isValid()) {
-					processMessage(msg);
-					emit messageReceived(msg);
+					processMessage(msg, datagram.senderAddress());
+					emit messageReceived(msg, datagram.senderAddress());
 				}
 				break;
 			}
@@ -122,8 +122,8 @@ void QOscUdpInterface::readReady() {
 			case QOsc::OscBundle: {
 				auto bundle = QOscBundle::read(data);
 				if (bundle.isValid()) {
-					processBundle(bundle);
-					emit bundleReceived(bundle);
+					processBundle(bundle, datagram.senderAddress());
+					emit bundleReceived(bundle, datagram.senderAddress());
 				}
 				break;
 			}

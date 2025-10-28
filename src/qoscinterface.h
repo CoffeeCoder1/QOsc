@@ -37,18 +37,18 @@ public slots:
     void send(const QOscBundle& b);
 
 signals:
-    void messageReceived(const QOscMessage& msg);
-    void bundleReceived(const QOscBundle& bundle);
+	void messageReceived(const QOscMessage &msg, const QHostAddress &sender);
+	void bundleReceived(const QOscBundle &bundle, const QHostAddress &sender);
 
-    void messageSent();
+	void messageSent();
 
 protected:
-    void processMessage(const QOscMessage& msg);
+	void processMessage(const QOscMessage &msg, const QHostAddress &sender);
 
-    void processBundle(const QOscBundle& b);
-    void executeBundle(const QOscBundle& b);
+	void processBundle(const QOscBundle &b, const QHostAddress &sender);
+	void executeBundle(const QOscBundle &b, const QHostAddress &sender);
 
-    virtual void sendData(const QByteArray& data) = 0;
+	virtual void sendData(const QByteArray &data) = 0;
 
 private:
     void connect(const QOscMethod::ptr& method);
